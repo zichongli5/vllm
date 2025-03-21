@@ -389,7 +389,7 @@ class PhiMoEDecoderLayer(nn.Module):
             rope_theta=rope_theta,
             cache_config=cache_config,
             quant_config=quant_config,
-            rope_scaling=config.rope_scaling,
+            rope_scaling=config.rope_scaling if hasattr(config, "rope_scaling") else None,
             prefix=f"{prefix}.self_attn",
         )
         self.block_sparse_moe = PhiMoE(
