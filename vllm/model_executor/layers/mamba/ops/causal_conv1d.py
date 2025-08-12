@@ -69,8 +69,8 @@ def _causal_conv1d_fwd_kernel(  # continuous batching
     # rather than mixing sequences - to make updating initial_states across sequences efficiently
 
     # single-sequence id
-    idx_seq = tl.load(batch_ptr + tl.program_id(0))
-    chunk_offset = tl.load(token_chunk_offset_ptr + tl.program_id(0))
+    idx_seq = tl.load(batch_ptr + tl.program_id(0)).to(tl.int64)
+    chunk_offset = tl.load(token_chunk_offset_ptr + tl.program_id(0)).to(tl.int64)
 
     # BLOCK_N elements along the feature-dimension (channel)
     idx_feats = tl.program_id(1) * BLOCK_N + tl.arange(0, BLOCK_N)
@@ -78,12 +78,12 @@ def _causal_conv1d_fwd_kernel(  # continuous batching
     if idx_seq == pad_slot_id:
         return
 
-    sequence_start_index = tl.load(query_start_loc_ptr + idx_seq)
-    sequence_end_index = tl.load(query_start_loc_ptr + idx_seq + 1)
+    sequence_start_index = tl.load(query_start_loc_ptr + idx_seq).to(tl.int64)
+    sequence_end_index = tl.load(query_start_loc_ptr + idx_seq + 1).to(tl.int64)
     # find the actual sequence length
     seqlen = sequence_end_index - sequence_start_index
 
-    token_offset = BLOCK_M * chunk_offset
+    token_offset = (BLOCK_M * chunk_offset).to(tl.int64)
     segment_len = min(BLOCK_M, seqlen - token_offset)
 
     # base of the sequence
