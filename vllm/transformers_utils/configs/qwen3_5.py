@@ -62,6 +62,7 @@ class Qwen3_5TextConfig(PretrainedConfig):
         linear_value_head_dim=128,
         linear_num_key_heads=16,
         linear_num_value_heads=32,
+        full_attention_sliding_window=None,
         layer_types=None,
         pad_token_id=None,
         bos_token_id=None,
@@ -106,6 +107,8 @@ class Qwen3_5TextConfig(PretrainedConfig):
         self.linear_value_head_dim = linear_value_head_dim
         self.linear_num_key_heads = linear_num_key_heads
         self.linear_num_value_heads = linear_num_value_heads
+        # Optional local window for full-attention layers only.
+        self.full_attention_sliding_window = full_attention_sliding_window
         super().__init__(**kwargs)
         # Set these AFTER super().__init__() because transformers v4's
         # PretrainedConfig.__init__ has these as explicit params with different

@@ -829,6 +829,23 @@ class Qwen3NextGatedDeltaNet(nn.Module, MambaBase):
 
 
 class Qwen3NextAttention(nn.Module):
+    @staticmethod
+    def _resolve_per_layer_sliding_window(
+        config: Qwen3NextConfig,
+        layer_idx: int,
+    ) -> int | None:
+        sliding_window = getattr(config, "full_attention_sliding_window", None)
+        if sliding_window is None:
+            return None
+
+        layer_types = getattr(config, "layer_types", None)
+        if layer_types is None or layer_idx >= len(layer_types):
+            return None
+
+        return (
+            sliding_window if layer_types[layer_idx] == "full_attention" else None
+        )
+
     def __init__(
         self,
         config: Qwen3NextConfig,
@@ -887,6 +904,10 @@ class Qwen3NextAttention(nn.Module):
             rope_parameters=config.rope_parameters,
             dual_chunk_attention_config=self.dual_chunk_attention_config,
         )
+        layer_idx = extract_layer_index(prefix)
+        per_layer_sliding_window = self._resolve_per_layer_sliding_window(
+            config, layer_idx
+        )
 
         self.attn = Attention(
             self.num_heads,
@@ -895,9 +916,10 @@ class Qwen3NextAttention(nn.Module):
             num_kv_heads=self.num_kv_heads,
             cache_config=cache_config,
             quant_config=quant_config,
+            per_layer_sliding_window=per_layer_sliding_window,
             prefix=f"{prefix}.attn",
             **{
-                "layer_idx": extract_layer_index(prefix),
+                "layer_idx": layer_idx,
                 "dual_chunk_attention_config": self.dual_chunk_attention_config,
             }
             if self.dual_chunk_attention_config

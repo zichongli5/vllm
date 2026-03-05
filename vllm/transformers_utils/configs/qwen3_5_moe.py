@@ -63,6 +63,7 @@ class Qwen3_5MoeTextConfig(PretrainedConfig):
         linear_value_head_dim=128,
         linear_num_key_heads=16,
         linear_num_value_heads=32,
+        full_attention_sliding_window=None,
         moe_intermediate_size=512,
         shared_expert_intermediate_size=512,
         num_experts_per_tok=8,
@@ -112,6 +113,8 @@ class Qwen3_5MoeTextConfig(PretrainedConfig):
         self.linear_value_head_dim = linear_value_head_dim
         self.linear_num_key_heads = linear_num_key_heads
         self.linear_num_value_heads = linear_num_value_heads
+        # Optional local window for full-attention layers only.
+        self.full_attention_sliding_window = full_attention_sliding_window
         self.moe_intermediate_size = moe_intermediate_size
         self.shared_expert_intermediate_size = shared_expert_intermediate_size
         self.num_experts_per_tok = num_experts_per_tok
